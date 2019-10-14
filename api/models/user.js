@@ -11,7 +11,8 @@ let User = new schema({
     },
     lastname: {
         type: String,
-        required: [true, 'lastname is required']
+        required: [true, 'lastname is required'],
+        lowercase: true
     },
     email: {
         type: String,
@@ -21,20 +22,30 @@ let User = new schema({
     },
     password: {
         type: String,
-        required: [true, 'password is required']
+        required: [true, 'password is required'],
     },
     contact: {
         type: String,
-        required: [true, 'contact is required']
+        required: [true, 'contact is required'],
+        lowercase: true
     },
     photo: {
-        type: String
+        type: String,
+        default: null
     },
     gender: {
-        type: String
+        type: String,
+        default: null,
+        lowercase: true
     },
     address: {
-        type: String
+        type: String,
+        default: null,
+        lowercase: true
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 

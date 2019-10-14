@@ -1,164 +1,125 @@
 // user service file
-const express = require('express')
 let User = require('../../models/user')
+let jwt = require('jsonwebtoken')
+let config = require('../../configs/config/config')
+let passwordHelper = require('../../helpers/passwordhelper')
+let fieldValidator = require('../../helpers/fieldvalidators')
+let error = require('../../helpers/errorHandler')
 
-const getUsers = async (req, res, next) => {
+// fuction that returns all users in the database
+const getUsers = async (req, res) => {
     try{
         let users = await User.find({})
-        if(users.length > 0){
-            return res.status(200).json({
-                success: true,
-                message: 'users retrieved sucessfully',
-                users
-            })
-        }
-        return res.status(404).json({
-            success: false,
-            message: 'no user found'
-        })
-    } catch(error){
-        return res.status(500).json({
-            success: false,
-            message: 'something went wrong'
-        })
+        if(users.length > 0)
+            return error.errorMessage(res, 200, 'users retrieved successfully', true, users)
+        return error.errorMessage(res, 404, 'no user found.', false)
+    }catch(err){
+        return error.errorMessage(res, 500, err.message, false)
     }
 }
 
-const getUserById = async (req, res, next) => {
+// function gets a single user from the database
+const getUserById = async (req, res) => {
     try{
         let user = await User.findById(req.params.id)
-        if(user){
-            return res.status(200).json({
-                success: true,
-                message: 'user found sucessfully',
-                user
-            })
-        }
-        return res.status(404).json({
-            success: false,
-            message: 'user not found'
-        })
-    }catch(error){
-        return res.status(500).json({
-            success: false,
-            message: 'something went wrong'
-        })
+        if(user)
+            return error.errorMessage(res, 200, 'user found successfully', true, user)
+        return error.errorMessage(res, 404, 'user not found', false)
+    }catch(err){
+        return error.errorMessage(res, 500, err.message, false)
     }
 }
 
-const createUser = async (req, res, next) => {
+// function that creates a user
+const createUser = async (req, res) => {
     try{
-        const { name, email } = req.body
+        const { firstname, lastname, contact, email, password } = req.body
+        let data = { firstname, lastname, contact, email, password }
 
-        if(name === '' || name === null || name === undefined){
-            return res.status(422).json({
-                success: false,
-                message: 'name is required'
-            })
-        }
+        // check for validity of data in request body
+        if(fieldValidator.validate(data))
+            return error.errorMessage(res, 422, fieldValidator.validate(data), false)
 
-        if(email === '' || email === null || email === undefined){
-            return res.status(422).json({
-                success: false,
-                message: 'email is required'
-            })
-        }
-
+        // check if email exists in the database
         let isEmailExists = await User.findOne({ email })
-        if(isEmailExists){
-            return res.status(409).json({
-                success: false,
-                message: 'email already exists'
-            })
-        }
+        if(isEmailExists)
+            return error.errorMessage(res, 409, 'email already exists', false)
 
-        const temp = { name, email }
+        const temp = { firstname, lastname, contact, email, password: await passwordHelper.cryptPassword(password) }
         let newUser = await User.create(temp)
 
-        if(newUser){
-            return res.status(201).json({
-                success: true,
-                message: 'user created sucessfully',
-                user: newUser
-            })
-        }
-        return res.status(500).json({
-            success: false,
-            message: 'something went wrong'
-        })
-    }catch(error){
-        return res.status(500).json({
-            success: false,
-            message: 'something went wrong'
-        })
+        // check if user is added
+        if(newUser)
+            return error.errorMessage(res, 201, 'user created sucessfully', true, newUser)
+    }catch(err){
+        return error.errorMessage(res, 500, err.message, false)
     }
 }
 
-const updateUser = async (req, res, next) => {
+// fuction that updates users in the database
+const updateUser = async (req, res) => {
     try{
         const user = req.params.id
-        const { name, email } = req.body
+        const { firstname, lastname, email, contact } = req.body
+        let data = { firstname, lastname, contact, email, password }
 
-        if(name === '' || name === null || name === undefined){
-            return res.status(422).json({
-                success: false,
-                message: 'name is required'
-            })
-        }
-
-        if(email === '' || email === null || email === undefined){
-            return res.status(422).json({
-                success: false,
-                message: 'email is required'
-            })
-        }
-
+        // check for validity of data in request body
+        if(fieldValidator.validate(data))
+            return error.errorMessage(res, 422, fieldValidator.validate(data), false)
+        
+        // check if email exists
         let isUserExists = await User.findById(user)
-        if(!isUserExists){
-            return res.status(404).json({
-                success: false,
-                message: 'user not found'
-            })
-        }
+        if(!isUserExists)
+            return error.errorMessage(res, 404, 'user not found', false)
 
+        // check if user is updated
         const temp = { name, email }
         let updateUser = await User.findByIdAndUpdate(user, temp, { new: true })
-        if(updateUser){
-            return res.status(200).json({
-                success: true,
-                message: 'user updated successfully'
-            })
-        }
-        return res.status(500).json({
-            success: false,
-            message: 'something went wrong'
-        })
-    }catch(error){
-        return res.status(500).json({
-            success: false,
-            message: 'something went wrong'
-        })
+        if(updateUser)
+            return error.errorMessage(res, 200, 'user updated successfully', true, updateUser)
+    }catch(err){
+        return error.errorMessage(res, 500, err.message, 500)
     }
 }
 
-const deleteUser = async (req, res, next) => {
+// function that deletes a user
+const deleteUser = async (req, res) => {
     try{
         let user = await User.findByIdAndRemove(req.params.id)
-        if(user){
-            return res.status(200).json({
-                success: true,
-                message: `user with Id: ${req.params.id} is deleted successfully`
-            })
+        if(user)
+            return error.errorMessage(res, 200, `user is deleted successfully`, true)
+        return error.errorMessage(res, 500, 'something went wrong', false)
+    }catch(err){
+        return error.errorMessage(res, 500, err.message, false)
+    }
+}
+
+// function that helps to login a user
+const loginUser = async (req, res) => {
+    try{
+        const { email, password } = req.body
+        let data = { email, password }
+
+        // check if input data is valid
+        if(fieldValidator.validate(data))
+            return error.errorMessage(res, 422, fieldValidator.validate(data), false)
+
+        // check if users with some email and password exists
+        let isUserExists = await User.findOne({ email })
+        if(isUserExists){
+            let userdata = isUserExists.toObject()
+            
+            // compare password
+            if(!await passwordHelper.passwordCompare(password, userdata['password'])){
+                userdata['token'] = jwt.sign({ email }, config.screteKey)
+                delete userdata['password']
+                return error.errorMessage(res, 200, 'user logged in successfully', true, userdata)
+            }
+            return error.errorMessage(res, 401, 'wrong password, try again', false)
         }
-        return res.status(500).json({
-            success: false,
-            message: 'something went wrong'
-        })
-    }catch(error){
-        return res.status(500).json({
-            success: false,
-            message: 'something went wrong'
-        })
+        return error.errorMessage(res, 404, 'user not found', false)
+    }catch(err){
+        return error.errorMessage(res, 500, err.message, false)
     }
 }
 
@@ -167,5 +128,6 @@ module.exports = {
     getUserById: getUserById,
     createUser: createUser,
     updateUser: updateUser,
-    deleteUser: deleteUser
+    deleteUser: deleteUser,
+    loginUser: loginUser
 }
