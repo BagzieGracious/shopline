@@ -12,3 +12,5 @@ export async function passwordCompare(password, passwordHash){
         return isMatch
     })
 }
+
+

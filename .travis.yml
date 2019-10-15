@@ -1,0 +1,19 @@
+language: node_js
+node_js:
+  - 'stable'
+cache:
+  directories:
+    - 'node_modules'
+install:
+  - npm install
+services:
+  - mongodb
+env:
+  global:
+    - NODE_ENV=test
+before_script:
+  - mongo shopline --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
+script:
+  - npm run test
+after_success:
+  - npm run coverage
