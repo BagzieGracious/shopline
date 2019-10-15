@@ -1,0 +1,11 @@
+exclude_patterns:
+ - "**/*.test.js"
+ - "app.js"
+checks:
+  method-lines:
+    config:
+      threshold: 80
+  similar-code:
+    enabled: false
+  identical-code:
+    enabled: false
