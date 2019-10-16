@@ -4,7 +4,7 @@
   "description": "This application enables users to buy cheap and affordable Chinese laptops",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "nyc mocha",
     "start": "node_modules/.bin/nodemon app.js --exec babel-node --"
   },
   "repository": {
@@ -25,11 +25,18 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.7.3"
+    "mongoose": "^5.7.3",
+    "nyc": "^14.1.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/register": "^7.6.2",
+    "chai": "^4.2.0",
     "dotenv": "^8.1.0",
     "eslint": "^6.5.1",
-    "nodemon": "^1.19.3"
+    "mocha": "^6.2.1",
+    "nodemon": "^1.19.3",
+    "request": "^2.88.0"
   }
 }
