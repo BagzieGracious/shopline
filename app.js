@@ -9,3 +9,5 @@ server.create(config, db)
 
 // start the server
 server.start()
+let app = server.app
+module.exports = app

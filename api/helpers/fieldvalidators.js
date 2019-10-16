@@ -16,7 +16,7 @@ let checkType = (data) => {
     return false
 }
 
-export function validate(data) {
+const validate = data => {
     if(checkIfEmpty(data)){
         return checkIfEmpty(data)
     } else if(checkType(data)){
@@ -24,3 +24,5 @@ export function validate(data) {
     }
     return false
 }
+
+module.exports = {validate:validate}

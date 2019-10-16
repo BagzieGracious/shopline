@@ -1,6 +1,7 @@
 // user service file
 let User = require('../../models/user')
 let jwt = require('jsonwebtoken')
+let mongoose = require('mongoose')
 let config = require('../../configs/config/config')
 let passwordHelper = require('../../helpers/passwordhelper')
 let fieldValidator = require('../../helpers/fieldvalidators')
@@ -9,7 +10,7 @@ let error = require('../../helpers/errorHandler')
 // fuction that returns all users in the database
 const getUsers = async (req, res) => {
     try{
-        let users = await User.find({})
+        let users = await User.find({}, {password: 0})
         if(users.length > 0)
             return error.errorMessage(res, 200, 'users retrieved successfully', true, users)
         return error.errorMessage(res, 404, 'no user found.', false)
@@ -21,10 +22,13 @@ const getUsers = async (req, res) => {
 // function gets a single user from the database
 const getUserById = async (req, res) => {
     try{
-        let user = await User.findById(req.params.id)
-        if(user)
-            return error.errorMessage(res, 200, 'user found successfully', true, user)
-        return error.errorMessage(res, 404, 'user not found', false)
+        if (mongoose.Types.ObjectId.isValid(req.params.id)){
+            let user = await User.findById(req.params.id)
+            if(user)
+                return error.errorMessage(res, 200, 'user found successfully', true, user)
+            return error.errorMessage(res, 404, 'user not found', false)
+        }
+        return error.errorMessage(res, 404, 'use a valid user id', false)
     }catch(err){
         return error.errorMessage(res, 500, err.message, false)
     }
@@ -45,7 +49,7 @@ const createUser = async (req, res) => {
         if(isEmailExists)
             return error.errorMessage(res, 409, 'email already exists', false)
 
-        const temp = { firstname, lastname, contact, email, password: await passwordHelper.cryptPassword(password) }
+        const temp = { firstname, lastname, contact, email, password: passwordHelper.cryptPassword(password) }
         let newUser = await User.create(temp)
 
         // check if user is added
@@ -108,10 +112,9 @@ const loginUser = async (req, res) => {
         let isUserExists = await User.findOne({ email })
         if(isUserExists){
             let userdata = isUserExists.toObject()
-            
-            // compare password
-            if(!await passwordHelper.passwordCompare(password, userdata['password'])){
-                userdata['token'] = jwt.sign({ email }, config.screteKey)
+
+            if(passwordHelper.passwordCompare(password, userdata['password'])){
+                userdata['token'] = await jwt.sign({ email }, config.screteKey)
                 delete userdata['password']
                 return error.errorMessage(res, 200, 'user logged in successfully', true, userdata)
             }
