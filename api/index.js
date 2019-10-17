@@ -36,5 +36,5 @@ module.exports = () => {
             console.log('Server running on http://' + hostname + ':' + port)
         })
     }
-    return { create, start }
+    return { create, start, app }
 }

@@ -12,7 +12,7 @@ env:
   global:
     - NODE_ENV=test
 before_script:
-  - mongo shopline --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
+  - mongo testshopline --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
 script:
   - npm run test
 after_success:

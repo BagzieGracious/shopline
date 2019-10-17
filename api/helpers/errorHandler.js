@@ -1,4 +1,4 @@
-export function errorMessage(res, code, message, boolean, data = false) {
+const errorMessage = (res, code, message, boolean, data = false) => {
     if (data == false)
         return res.status(code).json({
             success: boolean,
@@ -10,3 +10,4 @@ export function errorMessage(res, code, message, boolean, data = false) {
         data
     })
 }
+module.exports = {errorMessage:errorMessage}
