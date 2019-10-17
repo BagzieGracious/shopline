@@ -55,7 +55,7 @@ describe('This suit handles tests for users endpoints', () => {
             contact: '0700558588',
         }).end((err, res) => {
             expect(res.status).to.equal(422)
-            expect(res.body.message).to.equal('password is missing.')
+            expect(res.body.message).to.equal('password is missing or empty.')
             done()
         })
     })
@@ -139,6 +139,35 @@ describe('This suit handles tests for users endpoints', () => {
                 expect(res.body.success).to.equal(false)
                 expect(res.body.message).to.equal('user not found')
             })
+            done()
+        })
+    })
+
+    it('update user -> correct way', done => {
+        chai.request(app).get('/api/v1/users').set('Accept', 'application/json').end((err, res) => {
+            let userid = res.body.data[0]._id
+            chai.request(app).put(`/api/v1/users/${userid}`).set('Accept', 'application/json').send({
+                lastname: 'joseph',
+                firstname: 'kyelu'
+            }).end((err, res) => {
+                expect(res.status).to.equal(200)
+                expect(res.body.success).to.equal(true)
+                expect(res.body.data.lastname).to.equal('joseph')
+                expect(res.body.message).to.equal('user updated successfully')
+                done()
+            })
+        })
+    })
+
+    it('update user -> user not found', done => {
+        let userid = "5da7b7a2783d0d2644ec7e12"
+        chai.request(app).put(`/api/v1/users/${userid}`).set('Accept', 'application/json').send({
+            lastname: 'joseph',
+            firstname: 'kyelu'
+        }).end((err, res) => {
+            expect(res.status).to.equal(404)
+            expect(res.body.success).to.equal(false)
+            expect(res.body.message).to.equal('user not found')
             done()
         })
     })

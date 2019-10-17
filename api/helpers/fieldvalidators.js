@@ -1,7 +1,7 @@
 let checkIfEmpty = data => {
     for (let field in data){
         if (data[field] === null || data[field] === undefined || data[field] === ''){
-            return `${field} is missing.`
+            return `${field} is missing or empty.`
         }
     }
     return false

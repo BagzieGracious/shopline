@@ -64,23 +64,22 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
     try{
         const user = req.params.id
-        const { firstname, lastname, email, contact } = req.body
-        let data = { firstname, lastname, contact, email, password }
-
         // check for validity of data in request body
-        if(fieldValidator.validate(data))
-            return error.errorMessage(res, 422, fieldValidator.validate(data), false)
+        if(fieldValidator.validate(req.body))
+            return error.errorMessage(res, 422, fieldValidator.validate(req.body), false)
         
         // check if email exists
-        let isUserExists = await User.findById(user)
-        if(!isUserExists)
-            return error.errorMessage(res, 404, 'user not found', false)
+        if (mongoose.Types.ObjectId.isValid(req.params.id)){
+            let isUserExists = await User.findById(user)
+            if(!isUserExists)
+                return error.errorMessage(res, 404, 'user not found', false)
 
-        // check if user is updated
-        const temp = { name, email }
-        let updateUser = await User.findByIdAndUpdate(user, temp, { new: true })
-        if(updateUser)
-            return error.errorMessage(res, 200, 'user updated successfully', true, updateUser)
+            // check if user is updated
+            let updateUser = await User.findByIdAndUpdate(user, req.body, { new: true })
+            if(updateUser)
+                return error.errorMessage(res, 200, 'user updated successfully', true, updateUser)
+        }
+        return error.errorMessage(res, 404, 'use a valid user id', false)
     }catch(err){
         return error.errorMessage(res, 500, err.message, 500)
     }
