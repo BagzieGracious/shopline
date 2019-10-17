@@ -88,10 +88,12 @@ const updateUser = async (req, res) => {
 // function that deletes a user
 const deleteUser = async (req, res) => {
     try{
-        let user = await User.findByIdAndRemove(req.params.id)
-        if(user)
-            return error.errorMessage(res, 200, `user is deleted successfully`, true)
-        return error.errorMessage(res, 500, 'something went wrong', false)
+        if (mongoose.Types.ObjectId.isValid(req.params.id)){
+            let user = await User.findByIdAndRemove(req.params.id)
+            if(user)
+                return error.errorMessage(res, 200, `user is deleted successfully`, true)
+        }
+        return error.errorMessage(res, 404, 'use a valid user id', false)
     }catch(err){
         return error.errorMessage(res, 500, err.message, false)
     }
