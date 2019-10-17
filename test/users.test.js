@@ -171,4 +171,16 @@ describe('This suit handles tests for users endpoints', () => {
             done()
         })
     })
+
+    it('delete user -> correct way', done => {
+        chai.request(app).get('/api/v1/users').set('Accept', 'application/json').end((err, res) => {
+            let userid = res.body.data[0]._id
+            chai.request(app).delete(`/api/v1/users/${userid}`).set('Accept', 'application/json').end((err, res) => {
+                expect(res.status).to.equal(200)
+                expect(res.body.success).to.equal(true)
+                expect(res.body.message).to.equal('user is deleted successfully')
+                done()
+            })
+        })
+    })
 })
