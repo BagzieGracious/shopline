@@ -63,4 +63,4 @@ Test application by running
 $ npm test
 ```
 
-Test your setup using a client app like postman
+Test your api using a client app like postman
