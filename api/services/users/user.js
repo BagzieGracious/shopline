@@ -115,7 +115,11 @@ const loginUser = async (req, res) => {
             let userdata = isUserExists.toObject()
 
             if(passwordHelper.passwordCompare(password, userdata['password'])){
-                userdata['token'] = await jwt.sign({ email }, config.screteKey)
+                userdata['token'] = await jwt.sign({ 
+                    email,
+                    exp:  Math.floor(Date.now() / 1000) + (60 * 60),
+                    admin: userdata['isAdmin']
+                }, config.screteKey)
                 delete userdata['password']
                 return error.errorMessage(res, 200, 'user logged in successfully', true, userdata)
             }
